@@ -1,4 +1,5 @@
 #!/bin/sh
+set -x
 
 dashless=$(basename "$0" | sed -e 's/-/ /')
 USAGE="list [<options>]
@@ -11,8 +12,9 @@ USAGE="list [<options>]
    or: $dashless clear"
 
 SUBDIRECTORY_OK=Yes
+OPTIONS_SPEC=
 START_DIR=$(pwd)
-. "$(git --exec-path)/git-sh-setup"
+. git-sh-setup
 require_work_tree
 cd_to_toplevel
 
@@ -20,3 +22,40 @@ ref_stash=refs/bstash
 
 
 
+# Main command set
+case "$1" in
+list)
+	shift
+	list_stash "$@"
+	;;
+save)
+	shift
+	save_stash "$@"
+	;;
+apply)
+	shift
+	apply_stash "$@"
+	;;
+clear)
+	shift
+	clear_stash "$@"
+	;;
+drop)
+	shift
+	drop_stash "$@"
+	;;
+pop)
+	shift
+	pop_stash "$@"
+	;;
+*)
+	case $# in
+	0)
+		save_stash &&
+		say "$(gettext "(To restore them type \"git stash apply\")")"
+		;;
+	*)
+		usage
+	esac
+	;;
+esac
